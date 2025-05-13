@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title> WhatsApp Bug Tool</title>
+  <title>WhatsApp Bug Tool</title>
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: monospace;
-      background-image: url('https://files.catbox.moe/pd6u2p.jpeg');
+      background-image: url('https://files.catbox.moe/w4v6ok.jpg');
       background-size: cover;
       background-position: center;
       color: #0f0;
@@ -64,7 +64,7 @@
 </head>
 <body>
   <div class="container">
-    <h2> WhatsApp Bug Tool</h2>
+    <h2>WhatsApp Bug Tool</h2>
     <input type="text" id="targetNumber" placeholder="Masukkan Nomor WhatsApp">
     <button onclick="sendBug('Layar Gelap')">Layar Gelap</button>
     <button onclick="sendBug('Reset HP')">Reset HP</button>
@@ -75,14 +75,15 @@
   <div id="popup">
     <h2>Free Trial Habis</h2>
     <p>Masukkan kode premium:</p>
-    <input type="text" id="premiumCode" placeholder="MASUKAN KODE">
+    <input type="text" id="premiumCode" placeholder="WAJIB BELI PREM">
     <button onclick="checkPremium()">Verifikasi</button>
     <p style="margin-top:10px;">BELI PREMIUM DI <b>6283821914043</b></p>
   </div>
 
   <script>
-    let usageCount = 0;
+    let usageCount = parseInt(localStorage.getItem("usageCount") || "0");
     let isPremium = localStorage.getItem("isPremium") === "true";
+    let trialExpired = localStorage.getItem("trialExpired") === "true";
 
     function sendBug(type) {
       const terminal = document.getElementById("terminal");
@@ -92,12 +93,21 @@
         return;
       }
 
-      if (!isPremium && usageCount >= 3) {
-        document.getElementById("popup").style.display = "flex";
-        return;
+      if (!isPremium) {
+        if (trialExpired) {
+          showPopup();
+          return;
+        }
+
+        usageCount++;
+        localStorage.setItem("usageCount", usageCount);
+        if (usageCount >= 3) {
+          localStorage.setItem("trialExpired", "true");
+          showPopup();
+          return;
+        }
       }
 
-      usageCount++;
       terminal.innerText = `Mengirim bug "${type}" ke ${number}...\n`;
       let progress = 0;
       const interval = setInterval(() => {
@@ -106,9 +116,13 @@
         terminal.scrollTop = terminal.scrollHeight;
         if (progress >= 100) {
           clearInterval(interval);
-          terminal.innerText += "Selesai! Bug telah dikirim.\n";
+          terminal.innerText += "✅ Bug telah dikirim ke target!\n";
         }
       }, 500);
+    }
+
+    function showPopup() {
+      document.getElementById("popup").style.display = "flex";
     }
 
     function checkPremium() {
